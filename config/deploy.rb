@@ -2,6 +2,7 @@ require 'mina/rails'
 require 'mina/git'
 # require 'mina/rbenv'  # for rbenv support. (https://rbenv.org)
 require 'mina/rvm' # for rvm support. (https://rvm.io)
+require 'mina/puma'
 
 # Basic settings:
 #   domain       - The hostname to SSH to.
@@ -35,6 +36,7 @@ task :remote_environment do
 
   # For those using RVM, use this to load an RVM version@gemset.
   invoke :'rvm:use', '2.4.1'
+
 end
 
 # Put any custom commands you need to run at setup
@@ -53,14 +55,17 @@ task :deploy do
     invoke :'git:clone'
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
-    # invoke :'rails:db_migrate'
+    command 'cp ~/credentials.yml.enc ./config/credentials.yml.enc --verbose'
+    command 'cp ~/master.key ./config/master.key --verbose'
+    invoke :'rails:db_migrate'
     # invoke :'rails:assets_precompile'
-    # invoke :'deploy:cleanup'
+    invoke :'deploy:cleanup'
 
     on :launch do
       in_path(fetch(:current_path)) do
         command %{mkdir -p tmp/}
         command %{touch tmp/restart.txt}
+        invoke :'puma:restart'
       end
     end
   end
