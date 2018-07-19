@@ -5,7 +5,7 @@ class ApplicationController < ActionController::API
   def app_check
     render json: {
       data: {
-        sha: `git rev-parse HEAD`
+        sha: `git symbolic-ref -q --short HEAD || git describe --tags --exact-match`
       }
     }
   end
