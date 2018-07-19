@@ -10,9 +10,8 @@ module V1
     end
 
     def show
-      render json: {
-        data: User.find(params[:id])
-      }
+      user = User.find(params[:id])
+      render json: UserSerializer.new(user).serialized_json
     end
   end
 end
